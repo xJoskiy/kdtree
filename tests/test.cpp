@@ -55,6 +55,7 @@ TEST(test_kdtree, test_query) {
     point<int> p({-24, 10});
     tree.insert(p);
     tree.insert(p);
+    tree.insert(point<int>({1, 1}));
 
     auto res = tree.query_search({1, 2}, {9, 6});
     std::vector<point<int>> expected{{2, 3}, {5, 4}, {7, 2}, {9, 6}};

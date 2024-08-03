@@ -18,7 +18,7 @@ private:
 
         node *left_;
         node *right_;
-        const point_type &point_;
+        point_type point_;
         size_t axis_;
 
         node(const point_type &point, node *left, node *right, size_t axis)
@@ -33,7 +33,9 @@ private:
     node *root_;
     size_t size_;
 
-    void insert_recursive(const point_type &point, node *&dest, size_t cur_dim);
+    template <typename T>
+    void insert_recursive(T &&point, node *&dest, size_t cur_dim);
+
     void search_recursive(node *start, std::vector<point_type> &res, const point_type &lower_bound,
                           const point_type &upper_bound) const;
 
@@ -49,7 +51,8 @@ public:
     void add_subtree(node *start, std::vector<point_type> &res) const;
 
     // insertion may lead a tree to unbalanced state
-    void insert(const point_type &point);
+    template <typename T>
+    void insert(T &&point);
 
     // return points in a k-dimensional rectangle
     std::vector<point_type> query_search(const point_type &lower_bound,
@@ -118,28 +121,30 @@ kdtree<point_type>::kdtree(const std::vector<point_type> &points) : kdtree<point
 }
 
 template <class point_type>
-void kdtree<point_type>::insert(const point_type &point) {
+template <class T>
+void kdtree<point_type>::insert(T &&point) {
     size_t cur_dim = 0;
-    insert_recursive(point, root_, cur_dim);
+    insert_recursive(std::forward<T>(point), root_, cur_dim);
     size_++;
 }
 
 template <class point_type>
-void kdtree<point_type>::insert_recursive(const point_type &point, kdtree<point_type>::node *&dest,
+template <class T>
+void kdtree<point_type>::insert_recursive(T &&point, kdtree<point_type>::node *&dest,
                                           size_t cur_dim) {
     if (dest == nullptr)
-        dest = new node(point, nullptr, nullptr, cur_dim % point.get_dim());
+        dest = new node(std::forward<T>(point), nullptr, nullptr, cur_dim % point.get_dim());
 
     else if (point[cur_dim] <= dest->point_[cur_dim]) {
         if (dest->left_ == nullptr)
-            dest->left_ = new node(point, nullptr, nullptr, (cur_dim + 1) % point.get_dim());
+            dest->left_ = new node(std::forward<T>(point), nullptr, nullptr, (cur_dim + 1) % point.get_dim());
         else
-            insert_recursive(point, dest->left_, cur_dim + 1);
+            insert_recursive(std::forward<T>(point), dest->left_, cur_dim + 1);
     } else {
         if (dest->right_ == nullptr)
-            dest->right_ = new node(point, nullptr, nullptr, (cur_dim + 1) % point.get_dim());
+            dest->right_ = new node(std::forward<T>(point), nullptr, nullptr, (cur_dim + 1) % point.get_dim());
         else
-            insert_recursive(point, dest->right_, cur_dim + 1);
+            insert_recursive(std::forward<T>(point), dest->right_, cur_dim + 1);
     }
 }
 

@@ -4,12 +4,15 @@
 #define KDTREE_H
 
 #include <algorithm>
+#include <concepts>
+#include <type_traits>
 #include <vector>
 
-// @param T is a type of a stored point
-// T supports operator[]
-// T[i] should support <, <=, >, >=
+namespace kdt {
 
+// @param T is a type of a stored point,
+// T should support operator[],
+// T[i] should support <, <=, >, >=, ==
 template <class point_type>
 class kdtree {
 private:
@@ -22,7 +25,7 @@ private:
         size_t axis_;
 
         node(const point_type &point, node *left, node *right, size_t axis)
-            : point_(point), left_(left), right_(right), axis_(axis) {};
+            : point_(point), left_(left), right_(right), axis_(axis){};
 
         ~node() {
             if (left_ != nullptr) delete left_;
@@ -40,11 +43,11 @@ private:
                           const point_type &upper_bound) const;
 
 public:
-    kdtree() : root_(nullptr), size_(0) {};
+    kdtree() : root_(nullptr), size_(0){};
     kdtree(const std::vector<point_type> &points);
     ~kdtree();
 
-    size_t size();
+    size_t size() const;
     void erase(node *dest);
 
     std::vector<point_type> as_vector() const;
@@ -109,7 +112,7 @@ void kdtree<point_type>::search_recursive(node *start, std::vector<point_type> &
 }
 
 template <class point_type>
-size_t kdtree<point_type>::size() {
+size_t kdtree<point_type>::size() const {
     return size_;
 }
 
@@ -137,12 +140,14 @@ void kdtree<point_type>::insert_recursive(T &&point, kdtree<point_type>::node *&
 
     else if (point[cur_dim] <= dest->point_[cur_dim]) {
         if (dest->left_ == nullptr)
-            dest->left_ = new node(std::forward<T>(point), nullptr, nullptr, (cur_dim + 1) % point.get_dim());
+            dest->left_ = new node(std::forward<T>(point), nullptr, nullptr,
+                                   (cur_dim + 1) % point.get_dim());
         else
             insert_recursive(std::forward<T>(point), dest->left_, cur_dim + 1);
     } else {
         if (dest->right_ == nullptr)
-            dest->right_ = new node(std::forward<T>(point), nullptr, nullptr, (cur_dim + 1) % point.get_dim());
+            dest->right_ = new node(std::forward<T>(point), nullptr, nullptr,
+                                    (cur_dim + 1) % point.get_dim());
         else
             insert_recursive(std::forward<T>(point), dest->right_, cur_dim + 1);
     }
@@ -157,5 +162,7 @@ template <class point_type>
 kdtree<point_type>::~kdtree() {
     erase(root_);
 }
+
+}  // namespace kdtree
 
 #endif  // KDTREE_H

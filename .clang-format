@@ -15,3 +15,5 @@ IncludeCategories:
 QualifierAlignment: Custom
 QualifierOrder: ['inline', 'static', 'const', 'type', 'volatile' ]
 SeparateDefinitionBlocks: Always
+DerivePointerAlignment: False
+PointerAlignment: Left

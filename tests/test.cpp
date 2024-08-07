@@ -5,6 +5,8 @@
 #include "gtest/gtest.h"
 #include "kdtree.h"
 
+using namespace kdt;
+
 template <class T>
 class point : public std::vector<T> {
     size_t dim;
@@ -24,53 +26,37 @@ public:
 };
 
 TEST(test_kdtree, test_insertion) {
-    std::vector<point<int>> points{{2, 3}, {4, 7}, {5, 4}, {7, 2}};  //, {8, 1}, {9, 6}};
+    std::vector<point<int>> points{{1, 1}, {1, 2}, {2, 1}, {3, 3}};
     kdtree<point<int>> tree(points);
 }
 
 TEST(test_kdtree, test_size) {
-    std::vector<point<int>> points{{2, 3}, {4, 7}, {5, 4}, {7, 2}, {8, 1}, {9, 6}};
+    std::vector<point<int>> points{{1, 1}};
     kdtree<point<int>> tree(points);
-    point<int> p({2, 2});
-    tree.insert(p);
-    tree.insert(p);
+    for (int i = 0; i < 10; i++) tree.insert(point<int>({i, -i}));
 
-    ASSERT_EQ(8, tree.size());
+    ASSERT_EQ(11, tree.size());
 }
 
-TEST(test_kdtree, test_root_query) {
-    std::vector<point<int>> points;
-    kdtree<point<int>> tree;
-    point<int> p({2, 2});
-    tree.insert(p);
+TEST(test_kdtree, test_rect_query) {
+    using enum rect<point<int>>::bound_type;
 
-    auto res = tree.query_search({1, 1}, {3, 3});
-    std::vector<point<int>> expected{{2, 2}};
-    EXPECT_EQ(expected, res);
-}
-
-TEST(test_kdtree, test_query) {
-    std::vector<point<int>> points{{2, 3}, {4, 7}, {5, 4}, {7, 2}, {8, 1}, {9, 6}};
+    std::vector<point<int>> points({{1, 1}, {1, 2}, {2, 1}, {2, 2}, {2, 3}, {3, 2}, {3, 3}});
     kdtree<point<int>> tree(points);
-    point<int> p({-24, 10});
-    tree.insert(p);
-    tree.insert(p);
-    tree.insert(point<int>({1, 1}));
 
-    auto res = tree.query_search({1, 2}, {9, 6});
-    std::vector<point<int>> expected{{2, 3}, {5, 4}, {7, 2}, {9, 6}};
+    std::vector<rect<point<int>>::bound_type> lower_bound_type{kClosed, kOpen};
+    std::vector<rect<point<int>>::bound_type> upper_bound_type{kOpen, kClosed};
+    rect<point<int>> box({1, 1}, {3, 3});
+    box.set_bound_type(lower_bound_type, upper_bound_type);
+
+    std::vector<point<int>> expected{{1, 2}, {2, 2}, {2, 3}};
+    auto res = tree.query_search(box);
     EXPECT_EQ(expected, res);
 }
 
 TEST(test_kdtree, test_as_vector) {
-    std::vector<point<int>> points{{2, 3}, {4, 7}, {5, 4}, {7, 2}, {8, 1}, {9, 6}};
-    kdtree<point<int>> tree(points);
-    point<int> p({2, 2});
-    tree.insert(p);
-    tree.insert(p);
-
+    kdtree<point<int>> tree{{5, 5}, {4, 5}, {6, 5}, {4, 4}, {4, 6}, {6, 4}, {6, 6}};
+    std::vector<point<int>> expected{{4, 4}, {4, 6}, {4, 5}, {6, 4}, {6, 6}, {6, 5}, {5, 5}};
     auto res = tree.as_vector();
-    std::vector<point<int>> expected{{2, 3}, {4, 7}, {5, 4}, {7, 2},
-                                     {8, 1}, {9, 6}, {2, 2}, {2, 2}};
     EXPECT_EQ(expected, res);
 }

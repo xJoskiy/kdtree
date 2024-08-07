@@ -29,7 +29,8 @@ public:
         assert(lower_bound_.get_dim() == upper_bound_.get_dim());
     }
 
-    void set_bound_type(std::vector<bound_type> lower_bound_type, std::vector<bound_type> upper_bound_type) {
+    void set_bound_type(std::vector<bound_type> lower_bound_type,
+                        std::vector<bound_type> upper_bound_type) {
         assert(lower_bound_.get_dim() == upper_bound_type_.size());
         lower_bound_type_ = lower_bound_type;
         upper_bound_type_ = upper_bound_type;
@@ -69,12 +70,12 @@ private:
         size_t axis_;
 
         node(const point_type& point, node* left, node* right, size_t axis)
-            : point_(point), left_(left), right_(right), axis_(axis){};
+            : point_(point), left_(left), right_(right), axis_(axis) {}
 
         ~node() {
             if (left_ != nullptr) delete left_;
             if (right_ != nullptr) delete right_;
-        };
+        }
     };
 
     node* root_;
@@ -92,10 +93,11 @@ public:
     // TODO: Create a balanced tree from a set points
     kdtree(const std::vector<point_type>& points);
     kdtree(const std::initializer_list<point_type>& points);
-    kdtree(const kdtree&) = delete;
-    kdtree(kdtree&&) = delete;
-    kdtree& operator=(const kdtree&) = delete;
+    kdtree& operator=(kdtree&&);
+    kdtree(kdtree&& tree);
     ~kdtree();
+
+    kdtree(const kdtree&) = delete;
 
     size_t size() const;
     void erase(node* dest);
@@ -111,14 +113,29 @@ public:
     std::vector<point_type> query_search(const rect<point_type>& box) const;
 };
 
-template <class point_type>
+template <typename point_type>
+kdtree<point_type>& kdtree<point_type>::operator=(kdtree<point_type>&& tree) {
+    root_ = tree.root_;
+    tree.root_ = nullptr;
+    tree.size_ = 0;
+    return *this;
+}
+
+template <typename point_type>
+kdtree<point_type>::kdtree(kdtree<point_type>&& tree) {
+    root_ = tree.root_;
+    tree.root_ = nullptr;
+    tree.size_ = 0;
+}
+
+template <typename point_type>
 std::vector<point_type> kdtree<point_type>::as_vector() const {
     std::vector<point_type> res;
     add_subtree(root_, res);
     return res;
 }
 
-template <class point_type>
+template <typename point_type>
 void kdtree<point_type>::add_subtree(node* start, std::vector<point_type>& res) const {
     if (start == nullptr) return;
     add_subtree(start->left_, res);
@@ -126,14 +143,14 @@ void kdtree<point_type>::add_subtree(node* start, std::vector<point_type>& res) 
     res.push_back(start->point_);
 }
 
-template <class point_type>
+template <typename point_type>
 std::vector<point_type> kdtree<point_type>::query_search(const rect<point_type>& box) const {
     std::vector<point_type> res;
     search_recursive(root_, res, box);
     return res;
 }
 
-template <class point_type>
+template <typename point_type>
 void kdtree<point_type>::search_recursive(node* start, std::vector<point_type>& res,
                                           const rect<point_type>& box) const {
     if (start == nullptr) return;
@@ -147,35 +164,35 @@ void kdtree<point_type>::search_recursive(node* start, std::vector<point_type>& 
     if (cur_val <= box.upper_bound_[cur_axis]) search_recursive(start->right_, res, box);
 }
 
-template <class point_type>
+template <typename point_type>
 size_t kdtree<point_type>::size() const {
     return size_;
 }
 
-template <class point_type>
+template <typename point_type>
 kdtree<point_type>::kdtree(const std::vector<point_type>& points) : kdtree<point_type>() {
     for (const auto& p : points) {
         insert(p);
     }
 }
 
-template <class point_type>
+template <typename point_type>
 kdtree<point_type>::kdtree(const std::initializer_list<point_type>& points) : kdtree<point_type>() {
     for (const auto& p : points) {
         insert(p);
     }
 }
 
-template <class point_type>
-template <class T>
+template <typename point_type>
+template <typename T>
 void kdtree<point_type>::insert(T&& point) {
     size_t cur_dim = 0;
     insert_recursive(std::forward<T>(point), root_, cur_dim);
     size_++;
 }
 
-template <class point_type>
-template <class T>
+template <typename point_type>
+template <typename T>
 void kdtree<point_type>::insert_recursive(T&& point, kdtree<point_type>::node*& dest,
                                           size_t cur_dim) {
     if (dest == nullptr)
@@ -196,12 +213,12 @@ void kdtree<point_type>::insert_recursive(T&& point, kdtree<point_type>::node*& 
     }
 }
 
-template <class point_type>
+template <typename point_type>
 void kdtree<point_type>::erase(kdtree<point_type>::node* dest) {
     delete dest;
 }
 
-template <class point_type>
+template <typename point_type>
 kdtree<point_type>::~kdtree() {
     erase(root_);
 }

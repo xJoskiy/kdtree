@@ -60,3 +60,22 @@ TEST(test_kdtree, test_as_vector) {
     auto res = tree.as_vector();
     EXPECT_EQ(expected, res);
 }
+
+TEST(test_kdtree, test_move_init) {
+    kdtree<point<int>> tree{{5, 5}, {4, 5}, {6, 5}, {4, 4}, {4, 6}, {6, 4}, {6, 6}};
+    kdtree<point<int>> another_tree = std::move(tree);
+    std::vector<point<int>> expected_vec{};
+    std::vector<point<int>> res_vec = tree.as_vector();
+    EXPECT_EQ(expected_vec, res_vec);
+    EXPECT_EQ(0, tree.size());
+}
+
+TEST(test_kdtree, test_move_assign) {
+    kdtree<point<int>> tree{{5, 5}, {4, 5}, {6, 5}, {4, 4}, {4, 6}, {6, 4}, {6, 6}};
+    kdtree<point<int>> another_tree;
+    another_tree = std::move(tree);
+    std::vector<point<int>> expected_vec{};
+    std::vector<point<int>> res_vec = tree.as_vector();
+    EXPECT_EQ(expected_vec, res_vec);
+    EXPECT_EQ(0, tree.size());
+}

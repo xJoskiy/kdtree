@@ -13,14 +13,16 @@ class kdtree;
 
 // @brief k-dimensional rectangle used for query search
 template <typename point_type>
-class rect {
-public:
+struct rect {
     enum bound_type { kOpen = 0, kClosed };
 
     point_type lower_bound_, upper_bound_;
     std::vector<bound_type> lower_bound_type_, upper_bound_type_;
 
     rect() = default;
+    rect(const rect<point_type>&) = default;
+    rect(rect<point_type>&&) = default;
+    rect<point_type>& operator=(const rect<point_type>&) = default;
 
     rect(const point_type& lower_bound, const point_type& upper_bound)
         : lower_bound_(lower_bound), upper_bound_(upper_bound) {

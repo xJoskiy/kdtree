@@ -78,6 +78,11 @@ private:
             if (left_ != nullptr) delete left_;
             if (right_ != nullptr) delete right_;
         }
+
+        node(node&&) = delete;
+        node(const node&) = delete;
+        node& operator=(const node&) = delete;
+        node& operator=(node&&) = delete;
     };
 
     node* root_;

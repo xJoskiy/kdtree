@@ -202,8 +202,10 @@ template <typename point_type>
 template <typename T>
 void kdtree<point_type>::insert_recursive(T&& point, kdtree<point_type>::node*& dest,
                                           size_t cur_dim) {
+    cur_dim %= point.get_dim();
+                                         
     if (dest == nullptr)
-        dest = new node(std::forward<T>(point), nullptr, nullptr, cur_dim % point.get_dim());
+        dest = new node(std::forward<T>(point), nullptr, nullptr, cur_dim);
 
     else if (point[cur_dim] <= dest->point_[cur_dim]) {
         if (dest->left_ == nullptr)

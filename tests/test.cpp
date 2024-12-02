@@ -8,74 +8,74 @@
 using namespace kdt;
 
 template <class T>
-class point : public std::vector<T> {
+class Point : public std::vector<T> {
     size_t dim;
 
 public:
-    size_t get_dim() const {
+    size_t GetDim() const {
         return dim;
     };
 
-    point(std::initializer_list<T> list) : std::vector<T>(list), dim(list.size()) {}
+    Point(std::initializer_list<T> list) : std::vector<T>(list), dim(list.size()) {}
 
-    point(const std::vector<T>& vec) : std::vector<T>(vec), dim(vec.size()) {}
+    Point(const std::vector<T>& vec) : std::vector<T>(vec), dim(vec.size()) {}
 
-    bool operator==(const point& p) const {
+    bool operator==(const Point& p) const {
         return static_cast<const std::vector<T>&>(p) == static_cast<const std::vector<T>&>(*this);
     }
 };
 
-TEST(test_kdtree, test_insertion) {
-    std::vector<point<int>> points{{1, 1}, {1, 2}, {2, 1}, {3, 3}};
-    kdtree<point<int>> tree(points);
+TEST(TestKDTree, TestInsertion) {
+    std::vector<Point<int>> points{{1, 1}, {1, 2}, {2, 1}, {3, 3}};
+    KDTree<Point<int>> tree(points);
 }
 
-TEST(test_kdtree, test_size) {
-    std::vector<point<int>> points{{1, 1}};
-    kdtree<point<int>> tree(points);
-    for (int i = 0; i < 10; i++) tree.insert(point<int>({i, -i}));
+TEST(TestKDTree, TestSize) {
+    std::vector<Point<int>> points{{1, 1}};
+    KDTree<Point<int>> tree(points);
+    for (int i = 0; i < 10; i++) tree.Insert(Point<int>({i, -i}));
 
-    ASSERT_EQ(11, tree.size());
+    ASSERT_EQ(11, tree.Size());
 }
 
-TEST(test_kdtree, test_rect_query) {
-    using enum rect<point<int>>::bound_type;
+TEST(TestKDTree, TestRectQuery) {
+    using enum Rect<Point<int>>::bound_type;
 
-    std::vector<point<int>> points({{1, 1}, {1, 2}, {2, 1}, {2, 2}, {2, 3}, {3, 2}, {3, 3}});
-    kdtree<point<int>> tree(points);
+    std::vector<Point<int>> points({{1, 1}, {1, 2}, {2, 1}, {2, 2}, {2, 3}, {3, 2}, {3, 3}});
+    KDTree<Point<int>> tree(points);
 
-    std::vector<rect<point<int>>::bound_type> lower_bound_type{kClosed, kOpen};
-    std::vector<rect<point<int>>::bound_type> upper_bound_type{kOpen, kClosed};
-    rect<point<int>> box({1, 1}, {3, 3});
-    box.set_bound_type(lower_bound_type, upper_bound_type);
+    std::vector<Rect<Point<int>>::bound_type> lower_bound_type{kClosed, kOpen};
+    std::vector<Rect<Point<int>>::bound_type> upper_bound_type{kOpen, kClosed};
+    Rect<Point<int>> box({1, 1}, {3, 3});
+    box.SetBoundType(lower_bound_type, upper_bound_type);
 
-    std::vector<point<int>> expected{{1, 2}, {2, 2}, {2, 3}};
-    auto res = tree.query_search(box);
+    std::vector<Point<int>> expected{{1, 2}, {2, 2}, {2, 3}};
+    auto res = tree.QuerySearch(box);
     EXPECT_EQ(expected, res);
 }
 
-TEST(test_kdtree, test_as_vector) {
-    kdtree<point<int>> tree{{5, 5}, {4, 5}, {6, 5}, {4, 4}, {4, 6}, {6, 4}, {6, 6}};
-    std::vector<point<int>> expected{{4, 4}, {4, 6}, {4, 5}, {6, 4}, {6, 6}, {6, 5}, {5, 5}};
-    auto res = tree.as_vector();
+TEST(TestKDTree, TestAsVector) {
+    KDTree<Point<int>> tree{{5, 5}, {4, 5}, {6, 5}, {4, 4}, {4, 6}, {6, 4}, {6, 6}};
+    std::vector<Point<int>> expected{{4, 4}, {4, 6}, {4, 5}, {6, 4}, {6, 6}, {6, 5}, {5, 5}};
+    auto res = tree.AsVector();
     EXPECT_EQ(expected, res);
 }
 
-TEST(test_kdtree, test_move_init) {
-    kdtree<point<int>> tree{{5, 5}, {4, 5}, {6, 5}, {4, 4}, {4, 6}, {6, 4}, {6, 6}};
-    kdtree<point<int>> another_tree = std::move(tree);
-    std::vector<point<int>> expected_vec{};
-    std::vector<point<int>> res_vec = tree.as_vector();
+TEST(TestKDTree, TestMoveInit) {
+    KDTree<Point<int>> tree{{5, 5}, {4, 5}, {6, 5}, {4, 4}, {4, 6}, {6, 4}, {6, 6}};
+    KDTree<Point<int>> another_tree = std::move(tree);
+    std::vector<Point<int>> expected_vec{};
+    std::vector<Point<int>> res_vec = tree.AsVector();
     EXPECT_EQ(expected_vec, res_vec);
-    EXPECT_EQ(0, tree.size());
+    EXPECT_EQ(0, tree.Size());
 }
 
-TEST(test_kdtree, test_move_assign) {
-    kdtree<point<int>> tree{{5, 5}, {4, 5}, {6, 5}, {4, 4}, {4, 6}, {6, 4}, {6, 6}};
-    kdtree<point<int>> another_tree;
+TEST(TestKDTree, TestMoveAssign) {
+    KDTree<Point<int>> tree{{5, 5}, {4, 5}, {6, 5}, {4, 4}, {4, 6}, {6, 4}, {6, 6}};
+    KDTree<Point<int>> another_tree;
     another_tree = std::move(tree);
-    std::vector<point<int>> expected_vec{};
-    std::vector<point<int>> res_vec = tree.as_vector();
+    std::vector<Point<int>> expected_vec{};
+    std::vector<Point<int>> res_vec = tree.AsVector();
     EXPECT_EQ(expected_vec, res_vec);
-    EXPECT_EQ(0, tree.size());
+    EXPECT_EQ(0, tree.Size());
 }
